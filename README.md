@@ -8,7 +8,82 @@
 git clone https://github.com/docker-hands-on-exercises/images-deep-dive-next.git
 ```
 
-## 01- The order of the commands in a Dockerfile is important
+## 01- Optimize the size of the images
+
+We want to install Python, Pip and Flask on Ubuntu
+
+### First build
+
+Navigate to the `00-layers` folder
+```bash
+cd 00-layers
+```
+
+This is the first `Dockerfile`: `Dockerfile.one`
+
+> 👋 change the path of the image after the `FROM` command if you use your own private image registry.
+```Dockerfile
+FROM ubuntu
+RUN apt update
+RUN apt install -y python3 python3-pip
+RUN pip install flask
+RUN apt autoremove --purge -y python3-pip
+RUN rm -f /var/lib/lists
+```
+
+**Build the image**: 
+
+```bash
+docker build -t hello-python:one -f Dockerfile.one . 
+```
+
+> Go to the **Builds** view and click on the `00-layers/Dockerfile.one` build
+![size-01.png](./imgs/size-01.png)
+
+> There is a layer per `RUN` command
+![size-02.png](./imgs/size-02.png)
+> Check the size of the image in the **Images** section
+
+The layers related to the installation are already created. So, the "purge" layer is useless.
+
+Now, let's try with another `Dockerfile`
+
+### Second build
+
+This is the second `Dockerfile`: `Dockerfile.two`
+
+> 👋 change the path of the image after the `FROM` command if you use your own private image registry.
+```Dockerfile
+FROM ubuntu
+RUN apt update && \
+    apt install -y python3 python3-pip && \
+    pip install flask && \
+    apt autoremove --purge -y python3-pip && \
+    rm -f /var/lib/lists
+```
+**✋ this time we used only one `RUN` command**
+
+**Build the image**: 
+
+```bash
+docker build -t hello-python:two -f Dockerfile.two . 
+```
+
+> Go to the **Builds** view and click on the `00-layers/Dockerfile.two` build
+![size-03.png](./imgs/size-03.png)
+
+> There is only one `RUN` layer
+![size-04.png](./imgs/size-04.png)
+> Check the size of the image in the **Images** section
+
+![size-05.png](./imgs/size-05.png)
+
+We run all the installation steps, and then the purge step, and than the layer was created. It's why we gained some space.
+
+
+## 02- Accelerate the build of the images
+
+> The order of the commands in a Dockerfile is important
 
 ### Hello 01
 
@@ -73,7 +148,7 @@ If you go back to the GUI of Docker Desktop:
 
 **Every time you change something in your project, everything at the build will be done again**.
 
-### 02- The order of the commands in a Dockerfile is ALWAYS important
+### Hello 02
 
 Navigate to the `02-hello` folder
 ```bash
@@ -143,4 +218,5 @@ If you go back to the GUI of Docker Desktop:
 > Go to the **Histroy** tab to get a graphical view of the progress of the builds:
 ![build-10.png](./imgs/build-10.png)
 
-## 
+## 03- Multi-stage builds
+
