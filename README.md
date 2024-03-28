@@ -220,3 +220,93 @@ If you go back to the GUI of Docker Desktop:
 
 ## 03- Multi-stage builds
 
+We want to "dockerize" a Golang application
+
+### First try
+
+This is the `Dockerfile` of the go application: `Dockerfile.golang`
+
+> 👋 change the path of the image after the `FROM` command if you use your own private image registry.
+```Dockerfile
+FROM golang
+COPY main.go .
+COPY go.mod .
+# it will produce a hello binary
+RUN go build 
+CMD ["./hello"]
+```
+
+**Build the image**: 
+
+```bash
+docker build -t hello-go:golang -f Dockerfile.golang . 
+```
+
+Launch the GUI of Docker Desktop and check the size of the image and the logs of the build.
+
+
+### Second try with 2 stages
+
+This is the `Dockerfile` of the go application: `Dockerfile.ubuntu`
+
+> 👋 change the path of the image after the `FROM` command if you use your own private image registry.
+```Dockerfile
+FROM golang as builder
+COPY main.go .
+COPY go.mod .
+RUN go build
+
+FROM ubuntu
+COPY --from=builder /go/hello .
+CMD ["./hello"]
+```
+- The first stage use the golang image to build the application
+- The second stage copy the binary into an ubuntu image
+
+**Build the image**: 
+
+```bash
+docker build -t hello-go:ubuntu -f Dockerfile.ubuntu .
+```
+
+Launch the GUI of Docker Desktop and check the size of the image and the logs of the build.
+
+
+### Third try with 2 stages and a scratch image
+> A scratch image is an empty image.
+
+This is the `Dockerfile` of the go application: `Dockerfile.scratch`
+
+> 👋 change the path of the image after the `FROM` command if you use your own private image registry.
+```Dockerfile
+FROM golang as builder
+COPY main.go .
+COPY go.mod .
+RUN go build 
+
+FROM scratch
+COPY --from=builder /go/hello .
+CMD ["./hello"]
+```
+
+**Build the image**: 
+
+```bash
+docker build -t hello-go:scratch -f Dockerfile.scratch . 
+```
+
+Launch the GUI of Docker Desktop and check the size of the image and the logs of the build.
+
+Try this command:
+
+```bash
+docker images | grep hello-go
+```
+
+The result is:
+
+```bash
+hello-go       scratch   473f6fa42148   2 minutes ago       1.95MB
+hello-go       ubuntu    59ebdecd616f   3 minutes ago       71.2MB
+hello-go       golang    825a7526a8f5   5 minutes ago       860MB
+```

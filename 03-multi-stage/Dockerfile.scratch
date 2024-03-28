@@ -1,0 +1,10 @@
+FROM golang as builder
+COPY main.go .
+COPY go.mod .
+RUN go build 
+
+FROM scratch
+COPY --from=builder /go/hello .
+CMD ["./hello"]
+
+# docker run hello-go:scratch
