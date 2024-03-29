@@ -1,0 +1,12 @@
+{
+  "name": "hello-cache",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "express": "4.18.2",
+    "redis": "^4.6.13"
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}

@@ -1,0 +1,12 @@
+FROM golang as builder
+
+WORKDIR /app
+
+RUN --mount=type=bind,source=.,target=/app \
+    go build -o helloworld .
+
+FROM scratch
+COPY --from=builder /app/helloworld /helloworld
+ENTRYPOINT ["/helloworld"]
+
+# docker run hello-go:scratch
