@@ -12,6 +12,8 @@ git clone https://github.com/docker-hands-on-exercises/images-deep-dive-next.git
 
 We want to install Python, Pip and Flask on Ubuntu
 
+> 💁 if you don't have the "Builds" menu in the UI of Docker Desktop, at the end of this paragraph, I explain how to get the history of the builds from a terminal
+
 ### First build
 
 Navigate to the `00-layers` folder
@@ -80,10 +82,62 @@ docker build -t hello-python:two -f Dockerfile.two .
 
 We run all the installation steps, and then the purge step, and than the layer was created. It's why we gained some space.
 
+## Get the build history with the CLI
+
+```bash
+docker history --format "table {{.CreatedBy}}\t{{.Size}}" hello-python:one
+# Get the size of the image
+docker images | grep hello-python
+
+docker history --format "table {{.CreatedBy}}\t{{.Size}}" hello-python:two
+# Get the size of the two images
+docker images | grep hello-python
+```
+
+You should get the following results:
+
+```bash
+docker history --format "table {{.CreatedBy}}\t{{.Size}}" hello-python:one
+
+CREATED BY                                      SIZE
+RUN /bin/sh -c rm -f /var/lib/lists # buildk…   0B
+RUN /bin/sh -c apt autoremove --purge -y pyt…   1.73MB
+RUN /bin/sh -c pip install flask # buildkit     4.64MB
+RUN /bin/sh -c apt install -y python3 python…   333MB
+RUN /bin/sh -c apt update # buildkit            45.7MB
+/bin/sh -c #(nop)  CMD ["/bin/bash"]            0B
+/bin/sh -c #(nop) ADD file:07cdbabf782942af0…   69.2MB
+/bin/sh -c #(nop)  LABEL org.opencontainers.…   0B
+/bin/sh -c #(nop)  LABEL org.opencontainers.…   0B
+/bin/sh -c #(nop)  ARG LAUNCHPAD_BUILD_ARCH     0B
+/bin/sh -c #(nop)  ARG RELEASE                  0B
+```
+
+```bash
+docker history --format "table {{.CreatedBy}}\t{{.Size}}" hello-python:two
+
+CREATED BY                                      SIZE
+RUN /bin/sh -c apt update &&     apt install…   82.1MB
+/bin/sh -c #(nop)  CMD ["/bin/bash"]            0B
+/bin/sh -c #(nop) ADD file:07cdbabf782942af0…   69.2MB
+/bin/sh -c #(nop)  LABEL org.opencontainers.…   0B
+/bin/sh -c #(nop)  LABEL org.opencontainers.…   0B
+/bin/sh -c #(nop)  ARG LAUNCHPAD_BUILD_ARCH     0B
+/bin/sh -c #(nop)  ARG RELEASE                  0B
+```
+
+```bash
+docker images | grep hello-python
+
+hello-python   two       e505d3cc01f3   20 minutes ago   151MB
+hello-python   one       a866994d8bdf   24 minutes ago   454MB
+```
 
 ## 02- Accelerate the build of the images
 
 > The order of the commands in a Dockerfile is important
+
+> 💁 if you don't have the "Builds" menu in the UI of Docker Desktop, you can simply read the progress of the build into the terminal
 
 ### Hello 01
 
