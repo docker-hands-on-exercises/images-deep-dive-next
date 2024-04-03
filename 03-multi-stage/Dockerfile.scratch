@@ -7,7 +7,7 @@ COPY go.mod .
 RUN go build 
 
 FROM scratch
-WORKDIR /app
+#WORKDIR /app
 COPY --from=builder /hello .
 CMD ["./hello"]
 
