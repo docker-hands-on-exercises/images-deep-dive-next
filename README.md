@@ -334,14 +334,20 @@ This is the `Dockerfile` of the go application: `Dockerfile.scratch`
 > 👋 change the path of the image after the `FROM` command if you use your own private image registry.
 ```Dockerfile
 FROM golang as builder
+#FROM golang:1.22.1-alpine as builder
+# depending the version of the Go image, you need to add the WORKDIR
+WORKDIR /
 COPY main.go .
 COPY go.mod .
 RUN go build 
 
 FROM scratch
-COPY --from=builder /go/hello .
+WORKDIR /app
+COPY --from=builder /hello .
 CMD ["./hello"]
 ```
+
+
 
 **Build the image**: 
 

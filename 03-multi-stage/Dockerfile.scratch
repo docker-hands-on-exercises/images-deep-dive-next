@@ -1,10 +1,14 @@
 FROM golang as builder
+#FROM golang:1.22.1-alpine as builder
+
+WORKDIR /
 COPY main.go .
 COPY go.mod .
 RUN go build 
 
 FROM scratch
-COPY --from=builder /go/hello .
+WORKDIR /app
+COPY --from=builder /hello .
 CMD ["./hello"]
 
 # docker run hello-go:scratch
